@@ -2,7 +2,8 @@
   "app": "npx tsx example/app.ts",
   "watch": {
     "include": [
-      "**"
+      "example",
+      "lib"
     ],
     "exclude": [
       "README.md",
