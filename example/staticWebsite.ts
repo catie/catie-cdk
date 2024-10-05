@@ -1,12 +1,10 @@
-// import { App } from 'aws-cdk-lib';
-// import { EnvironmentContext, Service, ServiceDefinition } from 'catie-cdk';
+import { ServiceDefinition } from '@catie/catie-cdk';
 
-// export const definition: ServiceDefinition = {
-//   serviceName: "StaticWebsite",
-//   components: {
-//   },
-// }
-// const app = new App();
-// const environment = EnvironmentContext.fromEnvironment();
-
-// new Service(app, environment, definition);
+export const staticWebsite: ServiceDefinition = {
+  serviceName: "NeonCabana",
+  components: {
+    gateway: {
+      domainNames: ["neon-cabana.com", "buildos.club", "bae-owolf.com", "catiemonster.com", "catiedonnelly.com"]
+    }
+  },
+}

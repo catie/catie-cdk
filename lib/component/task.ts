@@ -45,13 +45,13 @@ export class ServiceTask extends ServiceComponent {
             containerPort: definition.port ?? 3000,
         });
 
-        new FargateService(this, `${this.componentName}Service`, {
-            cluster: this.context.serviceCore,
-            taskDefinition: taskDefinition,
-            assignPublicIp: true,
-            vpcSubnets: { subnetType: SubnetType.PUBLIC },
-            securityGroups: [this.context.securityGroup],
-        });
+        // new FargateService(this, `${this.componentName}Service`, {
+        //     cluster: this.context.serviceCore,
+        //     taskDefinition: taskDefinition,
+        //     assignPublicIp: true,
+        //     vpcSubnets: { subnetType: SubnetType.PUBLIC },
+        //     securityGroups: [this.context.securityGroup],
+        // });
     }
 
     public addEnvironment(varName: string, value: string): void {

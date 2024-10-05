@@ -33,23 +33,14 @@ export class EnvironmentContext {
 export interface ServiceContextProps {
     readonly environment: EnvironmentContext;
     readonly serviceName: string;
-    readonly serviceCore: Cluster;
-    readonly securityGroup: SecurityGroup;
 }
 
 export class ServiceContext extends EnvironmentContext {
     readonly serviceName: string;
-    readonly serviceCore: Cluster;
-    readonly securityGroup: SecurityGroup;
 
     public constructor(props: ServiceContextProps) {
         super(props.environment.stage, props.environment.awsAccountId, props.environment.awsRegion);
         this.serviceName = props.serviceName;
-        this.serviceCore = props.serviceCore;
-        this.securityGroup = props.securityGroup;
     }
 
-    public privateCloud(): IVpc {
-        return this.serviceCore.vpc;
-    }
 }
