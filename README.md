@@ -1,2 +1,2 @@
 # catie-cdk
-Catie's simple, secure CDK lib
+Catie's simple, more-secure-by-default-than-most CDK lib
