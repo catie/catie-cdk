@@ -1,5 +1,5 @@
 {
-  "name": "catie-cdk",
+  "name": "@catie/catie-cdk",
   "version": "1.0.0",
   "type": "module",
   "description": "Catie's Simple CDK Lib",
