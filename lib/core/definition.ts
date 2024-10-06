@@ -1,4 +1,18 @@
-import { BehaviorOptions } from "aws-cdk-lib/aws-cloudfront";
+export interface GatewayDefinition {
+    readonly domainNames: string[];
+    readonly bucketName?: string;
+    readonly keySigningKeyName?: string;
+}
+
+export interface StaticWebsiteDefinition {
+    readonly isWebsite: boolean;
+    readonly bucketName?: string;
+    readonly domainNames?: string[];
+}
+
+export interface BucketDefinition {
+    readonly bucketName: string;
+}
 
 export interface TaskDefinition {
     readonly assetPath: string;
@@ -10,17 +24,7 @@ export interface TableDefinition {
     readonly sortKey?: string;
 }
 
-export interface BucketDefinition {
-    readonly bucketName: string;
-}
-
-export interface GatewayDefinition {
-    readonly domainNames: string[];
-    readonly keySigningKeyName?: string;
-    readonly defaultBehavior?: BehaviorOptions;
-}
-
-export type ComponentDefinition = TableDefinition | TaskDefinition | BucketDefinition;
+export type ComponentDefinition = TableDefinition | TaskDefinition | BucketDefinition | StaticWebsiteDefinition;
 
 export interface ServiceDefinition {
     readonly serviceName: string;

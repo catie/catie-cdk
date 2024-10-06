@@ -1,7 +1,6 @@
 import { Cluster } from 'aws-cdk-lib/aws-ecs';
 import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { ServiceComponent, ServiceComponentProps } from '../core/component';
-import { ComponentDefinition } from '../core/definition';
 
 
 export class ServiceCluster extends ServiceComponent {

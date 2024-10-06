@@ -4,7 +4,12 @@ export const staticWebsite: ServiceDefinition = {
   serviceName: "NeonCabana",
   gateway: {
     domainNames: ["neon-cabana.com"],
-    keySigningKeyName: "DnsSec",
+    // keySigningKeyName: "DnsSec",
   },
-  components: {},
+  components: {
+    baeowolf: {
+      bucketName: "bae-owolf",
+      domainNames: ["bae-owolf.com"],
+    }
+  },
 }

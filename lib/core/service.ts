@@ -4,9 +4,9 @@ import { EnvironmentContext, ServiceContext } from './context';
 import { ServiceTable } from '../component/table';
 import { ServiceComponentProps } from './component';
 import { ServiceTask } from '../component/task';
-import { ServiceBucket } from '../component/bucket';
+import { ServiceBucket, StaticWebsiteBucket } from '../component/bucket';
 import { ServiceGateway } from '../component/gateway';
-import { ServiceDefinition, ComponentDefinition } from './definition';
+import { ServiceDefinition, ComponentDefinition, TableDefinition, BucketDefinition, StaticWebsiteDefinition, TaskDefinition } from './definition';
 
 export class Service extends Stack {
   readonly context: ServiceContext;
@@ -37,14 +37,23 @@ export class Service extends Stack {
   // TODO: Find a cleaner way to do this
   private buildComponent(componentName: string, definition: ComponentDefinition): void {
     const props = this.componentProps(componentName);
-    if (Object.keys(definition).includes("partitionKey")) {
-      ServiceTable.forDefinition(props, definition);
+    const definedFields = Object.keys(definition);
+
+    if (definedFields.includes("partitionKey")) {
+      new ServiceTable(props, definition as TableDefinition);
     }
-    else if (Object.keys(definition).includes("assetPath")) {
-      ServiceTask.forDefinition(props, definition);
+    else if (definedFields.includes("assetPath")) {
+      new ServiceTask(props, definition as TaskDefinition);
     }
-    else if (Object.keys(definition).includes("bucketName")) {
-      ServiceBucket.forDefinition(props, definition);
+    else if (definedFields.includes("isWebsite")) {
+      if (!this.gateway) {
+        throw new Error("No service gateway defined");
+      }
+      const website = new StaticWebsiteBucket(props, definition as StaticWebsiteDefinition, this.gateway.assetContainer);
+      this.gateway.addStaticWebsite(website);
+    }
+    else if (definedFields.includes("bucketName")) {
+      new ServiceBucket(props, definition as BucketDefinition);
     }
   }
 

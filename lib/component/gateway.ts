@@ -1,15 +1,13 @@
 import { Distribution } from 'aws-cdk-lib/aws-cloudfront';
-import { S3StaticWebsiteOrigin } from 'aws-cdk-lib/aws-cloudfront-origins';
-import { ServiceBucket } from './bucket';
+import { StaticWebsiteBucket } from './bucket';
 import { GatewayDefinition } from '../core/definition';
 import { CfnDNSSEC, HostedZone, KeySigningKey, PublicHostedZone } from 'aws-cdk-lib/aws-route53';
 import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
 import { EncryptedComponent, EncryptedComponentProps } from '../core/component';
-import { IKey, Key } from 'aws-cdk-lib/aws-kms';
 
 
 export class ServiceGateway extends EncryptedComponent {
-    readonly assetContainer: ServiceBucket;
+    readonly assetContainer: StaticWebsiteBucket;
     readonly hostedZones: { [key: string]: HostedZone };
     readonly distribution: Distribution;
     readonly keySigningKeyName?: string;
@@ -17,16 +15,14 @@ export class ServiceGateway extends EncryptedComponent {
     constructor(props: EncryptedComponentProps, definition: GatewayDefinition) {
         super(props);
 
-        this.assetContainer = new ServiceBucket(this.childProps("Assets"), { bucketName: `${this.context.serviceName}-assets` });
+        this.assetContainer = new StaticWebsiteBucket(this.childProps("Assets"), { isWebsite: true, bucketName: `${this.context.serviceName}-assets` });
 
         this.keySigningKeyName = definition.keySigningKeyName;
         this.hostedZones = this.buildHostedZones(definition.domainNames);
         const certificate = this.buildCertificate(this.hostedZones);
 
         this.distribution = new Distribution(this, this.childName("CloudFront"), {
-            defaultBehavior: definition.defaultBehavior ?? {
-                origin: new S3StaticWebsiteOrigin(this.assetContainer.bucket),
-            },
+            defaultBehavior: { origin: this.assetContainer.origin() },
             domainNames: definition.domainNames,
             certificate: certificate,
             logBucket: this.assetContainer.logBucket,
@@ -66,5 +62,9 @@ export class ServiceGateway extends EncryptedComponent {
         dnssec.node.addDependency(dnsKey);
 
         return zone;
+    }
+
+    public addStaticWebsite(website: StaticWebsiteBucket) {
+        return this.distribution.addBehavior(website.componentName, website.origin());
     }
 }
