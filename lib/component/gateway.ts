@@ -1,70 +1,69 @@
-import { Distribution } from 'aws-cdk-lib/aws-cloudfront';
+import { AllowedMethods, Distribution, SecurityPolicyProtocol, SSLMethod, ViewerProtocolPolicy } from 'aws-cdk-lib/aws-cloudfront';
 import { StaticWebsiteBucket } from './bucket';
 import { GatewayDefinition } from '../core/definition';
-import { CfnDNSSEC, HostedZone, KeySigningKey, PublicHostedZone } from 'aws-cdk-lib/aws-route53';
-import { Certificate } from 'aws-cdk-lib/aws-certificatemanager';
+import { HostedZone, PublicHostedZone } from 'aws-cdk-lib/aws-route53';
+import { Certificate, CertificateValidation } from 'aws-cdk-lib/aws-certificatemanager';
 import { EncryptedComponent, EncryptedComponentProps } from '../core/component';
 
-
+interface SslZone {
+    readonly hostedZone: HostedZone;
+    readonly certificate: Certificate;
+}
 export class ServiceGateway extends EncryptedComponent {
     readonly assetContainer: StaticWebsiteBucket;
-    readonly hostedZones: { [key: string]: HostedZone };
+    readonly hostedZones: { [key: string]: SslZone };
     readonly distribution: Distribution;
-    readonly keySigningKeyName?: string;
+    readonly primaryDomain: string;
+    readonly altDomains: string[];
 
     constructor(props: EncryptedComponentProps, definition: GatewayDefinition) {
         super(props);
 
-        this.assetContainer = new StaticWebsiteBucket(this.childProps("Assets"), { isWebsite: true, bucketName: `${this.context.serviceName}-assets` });
+        this.assetContainer = new StaticWebsiteBucket(this.childProps("Assets"), {
+            isWebsite: true,
+            bucketName: `${this.context.serviceName}-assets`
+        });
+        this.primaryDomain = definition.domainNames[0];
+        this.altDomains = definition.domainNames.slice(1, definition.domainNames.length);
 
-        this.keySigningKeyName = definition.keySigningKeyName;
         this.hostedZones = this.buildHostedZones(definition.domainNames);
-        const certificate = this.buildCertificate(this.hostedZones);
 
+        const primaryZone = this.hostedZones[this.primaryDomain];
         this.distribution = new Distribution(this, this.childName("CloudFront"), {
-            defaultBehavior: { origin: this.assetContainer.origin() },
-            domainNames: definition.domainNames,
-            certificate: certificate,
-            logBucket: this.assetContainer.logBucket,
+            defaultBehavior: {
+                origin: this.assetContainer.origin(),
+                allowedMethods: AllowedMethods.ALLOW_ALL,
+                viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+            },
+            domainNames: Object.keys(this.hostedZones),
+            certificate: primaryZone.certificate,
         });
     }
 
-    private buildCertificate(hostedZones: { [key: string]: HostedZone }): Certificate {
-        const domains = Object.keys(hostedZones);
-        const primary = domains[0];
-        const alts = domains.slice(1, domains.length);
-        return new Certificate(this, this.childName("Certificate"), {
-            domainName: primary,
-            subjectAlternativeNames: alts,
-        })
-    }
-
-    private buildHostedZones(domainNames: string[]): { [key: string]: HostedZone } {
+    private buildHostedZones(domainNames: string[]): { [key: string]: SslZone } {
         const zones = domainNames.map(domain => [domain, this.buildHostedZone(domain)]);
         return Object.fromEntries(zones);
     }
 
-    private buildHostedZone(domain: string): HostedZone {
-        const zone = new PublicHostedZone(this, domain, { zoneName: domain });
-        if (!this.keySigningKeyName) {
-            return zone;
-        }
+    private buildHostedZone(domain: string): SslZone {
+        const zone = new PublicHostedZone(this, domain, { zoneName: domain, caaAmazon: true });
+        const cert = new Certificate(this, `${domain.toLowerCase()}_cert`, {
+            domainName: domain,
+            validation: CertificateValidation.fromDns(zone),
+        })
 
-        const base = domain.replace(".", "_").replace("-", "_");
-        const keyName = `${base}_dns_signing_key`;
-        const dnsKey = KeySigningKey.fromKeySigningKeyAttributes(this, keyName, {
+        return {
             hostedZone: zone,
-            keySigningKeyName: this.keySigningKeyName,
-        });
-        const dnssec = new CfnDNSSEC(this, `${base}_dnssec`, {
-            hostedZoneId: zone.hostedZoneId
-        });
-        dnssec.node.addDependency(dnsKey);
-
-        return zone;
+            certificate: cert,
+        };
     }
 
-    public addStaticWebsite(website: StaticWebsiteBucket) {
-        return this.distribution.addBehavior(website.componentName, website.origin());
+    public addStaticWebsite(website: StaticWebsiteBucket, domains?: string[]) {
+        const zones = this.buildHostedZones(domains ?? []);
+        domains?.forEach(domain => this.hostedZones[domain] = zones[domain]);
+
+        this.distribution.addBehavior(Object.keys(zones)[0], website.origin(), {
+            viewerProtocolPolicy: ViewerProtocolPolicy.REDIRECT_TO_HTTPS
+        });
     }
 }

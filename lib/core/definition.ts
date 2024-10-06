@@ -1,7 +1,6 @@
 export interface GatewayDefinition {
     readonly domainNames: string[];
     readonly bucketName?: string;
-    readonly keySigningKeyName?: string;
 }
 
 export interface StaticWebsiteDefinition {

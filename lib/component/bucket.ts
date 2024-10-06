@@ -1,9 +1,9 @@
-import { BlockPublicAccess, Bucket } from "aws-cdk-lib/aws-s3";
+import { BlockPublicAccess, Bucket, BucketAccessControl } from "aws-cdk-lib/aws-s3";
 import { BucketDefinition, StaticWebsiteDefinition } from "../core/definition";
 import { RemovalPolicy } from "aws-cdk-lib";
 import { EncryptedComponent, EncryptedComponentProps } from "../core/component";
 import { S3StaticWebsiteOrigin } from "aws-cdk-lib/aws-cloudfront-origins";
-import { ServiceGateway } from "./gateway";
+import { OriginProtocolPolicy, ViewerProtocolPolicy } from "aws-cdk-lib/aws-cloudfront";
 
 export class BaseBucket extends EncryptedComponent {
 
@@ -22,7 +22,7 @@ export class BaseBucket extends EncryptedComponent {
     }
 
     protected buildLogBucket(bucketName: string): Bucket {
-        return new Bucket(this, this.childName("Logs"), this.defaultProps(`${bucketName}-access-logs`));
+        return new Bucket(this, this.childName("Logs"), { ...this.defaultProps(`${bucketName}-access-logs`), accessControl: BucketAccessControl.BUCKET_OWNER_FULL_CONTROL });
     }
 }
 
@@ -65,6 +65,8 @@ export class StaticWebsiteBucket extends BaseBucket {
     }
 
     public origin(): S3StaticWebsiteOrigin {
-        return new S3StaticWebsiteOrigin(this.bucket);
+        return new S3StaticWebsiteOrigin(this.bucket, {
+            protocolPolicy: OriginProtocolPolicy.HTTPS_ONLY,
+        });
     }
 }

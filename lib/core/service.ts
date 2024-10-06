@@ -49,8 +49,9 @@ export class Service extends Stack {
       if (!this.gateway) {
         throw new Error("No service gateway defined");
       }
-      const website = new StaticWebsiteBucket(props, definition as StaticWebsiteDefinition, this.gateway.assetContainer);
-      this.gateway.addStaticWebsite(website);
+      const websiteDef = definition as StaticWebsiteDefinition;
+      const website = new StaticWebsiteBucket(props, websiteDef, this.gateway.assetContainer);
+      this.gateway.addStaticWebsite(website, websiteDef.domainNames);
     }
     else if (definedFields.includes("bucketName")) {
       new ServiceBucket(props, definition as BucketDefinition);
