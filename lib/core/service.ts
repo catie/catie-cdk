@@ -1,12 +1,12 @@
 import { Stack } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { BucketDefinition, CloudFrontDefinition, ServiceDefinition, SupportedDefinition, TableDefinition, TaskDefinition } from './definition';
 import { EnvironmentContext, ServiceContext } from './context';
-import { ServiceTable } from './component/table';
-import { ServiceComponentProps } from './component/component';
-import { ServiceTask } from './component/task';
-import { ServiceBucket } from './component/bucket';
-import { ServiceGateway } from './component/cloudFront';
+import { ServiceTable } from '../component/table';
+import { ServiceComponentProps } from './component';
+import { ServiceTask } from '../component/task';
+import { ServiceBucket } from '../component/bucket';
+import { ServiceGateway } from '../component/gateway';
+import { ServiceDefinition, SupportedDefinition } from './definition';
 
 export class Service extends Stack {
   readonly context: ServiceContext;
@@ -28,22 +28,24 @@ export class Service extends Stack {
       .forEach(([componentName, definition]) => this.buildComponent(componentName, definition));
   }
 
+  // TODO: Find a cleaner way to do this
   private buildComponent(componentName: string, definition: SupportedDefinition): void {
+    const props = this.componentProps(componentName);
     if (Object.keys(definition).includes("partitionKey")) {
-      new ServiceTable(this.getPropsFor(componentName), definition as TableDefinition);
+      ServiceTable.forDefinition(props, definition);
     }
     else if (Object.keys(definition).includes("assetPath")) {
-      new ServiceTask(this.getPropsFor(componentName), definition as TaskDefinition);
+      ServiceTask.forDefinition(props, definition);
     }
     else if (Object.keys(definition).includes("bucketName")) {
-      new ServiceBucket(this.getPropsFor(componentName), definition as BucketDefinition);
+      ServiceBucket.forDefinition(props, definition);
     }
     else if (Object.keys(definition).includes("domainNames")) {
-      new ServiceGateway(this.getPropsFor(componentName), definition as CloudFrontDefinition);
+      ServiceGateway.forDefinition(props, definition);
     }
   }
 
-  private getPropsFor(componentName: string): ServiceComponentProps {
+  private componentProps(componentName: string): ServiceComponentProps {
     return {
       scope: this,
       context: this.context,

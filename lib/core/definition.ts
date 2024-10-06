@@ -14,12 +14,12 @@ export interface BucketDefinition {
     readonly bucketName: string;
 }
 
-export interface CloudFrontDefinition {
+export interface GatewayDefinition {
     readonly domainNames: string[];
     readonly defaultBehavior?: BehaviorOptions;
 }
 
-export type SupportedDefinition = TableDefinition | TaskDefinition | BucketDefinition | CloudFrontDefinition;
+export type SupportedDefinition = TableDefinition | TaskDefinition | BucketDefinition | GatewayDefinition;
 
 export interface ServiceDefinition {
     readonly serviceName: string;

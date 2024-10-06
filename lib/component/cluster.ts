@@ -1,13 +1,10 @@
 import { Cluster } from 'aws-cdk-lib/aws-ecs';
-import { Peer, Port, SecurityGroup } from 'aws-cdk-lib/aws-ec2';
-import { ServiceComponent, ServiceComponentProps } from './component';
+import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { ServiceComponent, ServiceComponentProps } from '../core/component';
+import { SupportedDefinition } from '../core/definition';
 
 
-// TODO: Make this configurable
-const DEFAULT_PORT = 6969
-
-
-export class Service extends ServiceComponent {
+export class ServiceCluster extends ServiceComponent {
   readonly cluster: Cluster;
   readonly securityGroup: SecurityGroup;
 
@@ -20,14 +17,10 @@ export class Service extends ServiceComponent {
       allowAllOutbound: true,
     });
 
-    this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(DEFAULT_PORT));
+    // this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(DEFAULT_PORT));
   }
 
-  private getPropsFor(componentName: string): ServiceComponentProps {
-    return {
-      scope: this,
-      context: this.context,
-      name: componentName,
-    }
+  public static forDefinition(props: ServiceComponentProps, definition: SupportedDefinition): ServiceCluster {
+    return new ServiceCluster(props);
   }
 }

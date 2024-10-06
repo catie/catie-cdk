@@ -7,7 +7,7 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "clean": "rm -rf cdk.out dist node_modules cdk.context.json",
+    "clean": "rm -rf cdk.out dist node_modules cdk.context.json && npm install",
     "test": "jest"
   },
   "repository": {
@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/catie/catie-cdk#readme",
   "devDependencies": {
-    "@catie/catie-cdk": "^1.0.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.9",
     "aws-cdk": "2.155.0",

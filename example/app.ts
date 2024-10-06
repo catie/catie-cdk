@@ -1,5 +1,5 @@
 import { App } from 'aws-cdk-lib';
-import { EnvironmentContext, Service } from '@catie/catie-cdk';
+import { EnvironmentContext, Service } from '../lib';
 import { staticWebsite } from './staticWebsite';
 
 const app = new App();

@@ -1,8 +1,8 @@
 import { Attribute, AttributeType, Table, TableEncryption } from "aws-cdk-lib/aws-dynamodb";
-import { TableDefinition } from "../definition";
+import { SupportedDefinition, TableDefinition } from "../core/definition";
 import { Function } from "aws-cdk-lib/aws-lambda";
 import { IPrincipal } from "aws-cdk-lib/aws-iam";
-import { EncryptedComponent, EncryptedComponentProps } from "./encrypted";
+import { EncryptedComponent, EncryptedComponentProps, ServiceComponentProps } from "../core/component";
 
 export class ServiceTable extends EncryptedComponent {
     readonly table: Table;
@@ -17,7 +17,7 @@ export class ServiceTable extends EncryptedComponent {
             throw new Error(`No partition key defined for ${this.componentName} table`);
         }
 
-        this.table = new Table(this, `${this.componentName}-table`, {
+        this.table = new Table(this, this.childName("Table"), {
             tableName: `${this.componentName}-${this.context.stage}`,
             partitionKey: partitionKey,
             sortKey: sortKey,
@@ -39,5 +39,9 @@ export class ServiceTable extends EncryptedComponent {
 
     public grantAccess(principal: IPrincipal): void {
         this.table.grantReadWriteData(principal);
+    }
+
+    public static forDefinition(props: ServiceComponentProps, definition: SupportedDefinition): ServiceTable {
+        return new ServiceTable(props, definition as TableDefinition);
     }
 }
