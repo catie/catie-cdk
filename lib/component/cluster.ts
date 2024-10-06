@@ -1,7 +1,7 @@
 import { Cluster } from 'aws-cdk-lib/aws-ecs';
 import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { ServiceComponent, ServiceComponentProps } from '../core/component';
-import { SupportedDefinition } from '../core/definition';
+import { ComponentDefinition } from '../core/definition';
 
 
 export class ServiceCluster extends ServiceComponent {
@@ -18,9 +18,5 @@ export class ServiceCluster extends ServiceComponent {
     });
 
     // this.securityGroup.addIngressRule(Peer.anyIpv4(), Port.tcp(DEFAULT_PORT));
-  }
-
-  public static forDefinition(props: ServiceComponentProps, definition: SupportedDefinition): ServiceCluster {
-    return new ServiceCluster(props);
   }
 }

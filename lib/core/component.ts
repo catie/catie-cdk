@@ -1,7 +1,7 @@
 import { Construct } from "constructs";
 import { ServiceContext } from './context';
 import { Key } from "aws-cdk-lib/aws-kms";
-import { SupportedDefinition } from "./definition";
+import { ComponentDefinition } from "./definition";
 
 export interface ServiceComponentProps {
     readonly scope: Construct;
@@ -36,7 +36,7 @@ export class ServiceComponent extends Construct {
         }
     }
 
-    public static forDefinition(props: ServiceComponentProps, definition: SupportedDefinition): ServiceComponent {
+    public static forDefinition(props: ServiceComponentProps, definition: ComponentDefinition): ServiceComponent {
         throw new Error("No instantiation method defined");
     }
 }

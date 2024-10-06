@@ -16,12 +16,14 @@ export interface BucketDefinition {
 
 export interface GatewayDefinition {
     readonly domainNames: string[];
+    readonly keySigningKeyName?: string;
     readonly defaultBehavior?: BehaviorOptions;
 }
 
-export type SupportedDefinition = TableDefinition | TaskDefinition | BucketDefinition | GatewayDefinition;
+export type ComponentDefinition = TableDefinition | TaskDefinition | BucketDefinition;
 
 export interface ServiceDefinition {
     readonly serviceName: string;
-    readonly components: { [key: string]: SupportedDefinition };
+    readonly gateway?: GatewayDefinition;
+    readonly components: { [key: string]: ComponentDefinition };
 }

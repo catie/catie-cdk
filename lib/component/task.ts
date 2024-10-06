@@ -1,7 +1,7 @@
 import { ManagedPolicy, Role, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { ServiceComponent, ServiceComponentProps } from "../core/component";
-import { SupportedDefinition, TaskDefinition } from "../core/definition";
-import { ContainerDefinition, ContainerImage, CpuArchitecture, FargateService, FargateTaskDefinition, LogDrivers, OperatingSystemFamily } from "aws-cdk-lib/aws-ecs";
+import { TaskDefinition } from "../core/definition";
+import { ContainerDefinition, ContainerImage, CpuArchitecture, FargateTaskDefinition, LogDrivers, OperatingSystemFamily } from "aws-cdk-lib/aws-ecs";
 
 export class ServiceTask extends ServiceComponent {
     readonly container: ContainerDefinition;
@@ -47,9 +47,5 @@ export class ServiceTask extends ServiceComponent {
 
     public addEnvironment(varName: string, value: string): void {
         this.container.addEnvironment(varName, value);
-    }
-
-    public static forDefinition(props: ServiceComponentProps, definition: SupportedDefinition): ServiceTask {
-        return new ServiceTask(props, definition as TaskDefinition);
     }
 }

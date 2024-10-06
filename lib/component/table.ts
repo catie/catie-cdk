@@ -1,8 +1,8 @@
 import { Attribute, AttributeType, Table, TableEncryption } from "aws-cdk-lib/aws-dynamodb";
-import { SupportedDefinition, TableDefinition } from "../core/definition";
+import { TableDefinition } from "../core/definition";
 import { Function } from "aws-cdk-lib/aws-lambda";
 import { IPrincipal } from "aws-cdk-lib/aws-iam";
-import { EncryptedComponent, EncryptedComponentProps, ServiceComponentProps } from "../core/component";
+import { EncryptedComponent, EncryptedComponentProps } from "../core/component";
 
 export class ServiceTable extends EncryptedComponent {
     readonly table: Table;
@@ -41,7 +41,4 @@ export class ServiceTable extends EncryptedComponent {
         this.table.grantReadWriteData(principal);
     }
 
-    public static forDefinition(props: ServiceComponentProps, definition: SupportedDefinition): ServiceTable {
-        return new ServiceTable(props, definition as TableDefinition);
-    }
 }
